@@ -1,0 +1,80 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.9.22'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'com.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
+    implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+
+    // JUnit для тестов
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+    testImplementation 'org.junit.platform:junit-platform-launcher:1.10.0'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+application {
+    mainClass = 'org.example.Main'
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
+    jvmArgs "-Dfile.encoding=UTF-8"
+}
+
+tasks.withType(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    archiveBaseName.set("matrix-calculator")
+    archiveClassifier.set("")
+    mergeServiceFiles()
+
+    manifest {
+        attributes("Main-Class": application.mainClass.get())
+    }
+}
+
+tasks.named('build') {
+    dependsOn 'shadowJar'
+}
+
+tasks.named('distZip') {
+    dependsOn 'shadowJar'
+}
+
+tasks.named('distTar') {
+    dependsOn 'shadowJar'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc) {
+    source = sourceSets.main.allJava
+    destinationDir = file("$buildDir/javadoc")
+    options.encoding = 'UTF-8'
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.locale = 'en_US' // Добавлено: Локаль
+    // Добавлено: Настройка заголовка
+    options.header = '<h1>Matrix Calculator API Documentation</h1>'
+    options.windowTitle = 'Matrix Calculator API'
+    options.addBooleanOption('notimestamp', true) // Убрать time stamp
+
+    // Добавлено: Ссылка на JavaDoc
+    options.links = ["https://docs.oracle.com/en/java/javase/17/docs/api/"]
+
+}
