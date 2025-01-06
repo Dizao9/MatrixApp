@@ -3,8 +3,6 @@ package org.example.operations;
 import org.example.exception.MatrixException;
 import org.example.matrix.Matrix;
 
-import java.util.Arrays;
-
 /**
  * Класс {@code MatrixOperations} предоставляет набор статических методов
  * для выполнения различных операций над матрицами, таких как сложение, вычитание,
@@ -50,11 +48,16 @@ public class MatrixOperations {
      * @param matrix Исходная матрица.
      * @param scalar  Скалярное значение, на которое умножается каждый элемент матрицы.
      * @return Результирующая матрица - произведение matrix и scalar.
+     * @throws MatrixException Если возникла ошибка при создании матрицы.
      */
-    public Matrix multiplyByScalar(Matrix matrix, double scalar) {
+    public Matrix multiplyByScalar(Matrix matrix, double scalar) throws MatrixException {
         int rows = matrix.getRows();
         int cols = matrix.getCols();
+
+        // Создание матрицы для результата
         Matrix result = new Matrix(rows, cols);
+
+        // Процесс умножения на скаляр
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 result.setElement(i, j, matrix.getElement(i, j) * scalar);
@@ -83,8 +86,10 @@ public class MatrixOperations {
         int cols1 = matrix1.getCols();
         int cols2 = matrix2.getCols();
 
+        // Создание матрицы для результата
         Matrix result = new Matrix(rows1, cols2);
 
+        // Процесс умножения матриц
         for (int i = 0; i < rows1; i++) {
             for (int j = 0; j < cols2; j++) {
                 double sum = 0;
@@ -100,7 +105,7 @@ public class MatrixOperations {
     /**
      * Вычисляет определитель матрицы.
      * <p>
-     *  Матрица должна быть квадратной (иметь одинаковое количество строк и столбцов).
+     * Матрица должна быть квадратной (иметь одинаковое количество строк и столбцов).
      * </p>
      *
      * @param matrix Исходная матрица.
@@ -114,8 +119,15 @@ public class MatrixOperations {
         return determinantRecursive(matrix.getData());
     }
 
+    /**
+     * Рекурсивно вычисляет определитель матрицы.
+     *
+     * @param matrix Исходная матрица в виде двумерного массива.
+     * @return Определитель матрицы.
+     */
     private double determinantRecursive(double[][] matrix) {
         int n = matrix.length;
+        System.out.println("Вычисление определителя для матрицы размера: " + n + "x" + n);
         if (n == 1) {
             return matrix[0][0];
         }
@@ -130,6 +142,14 @@ public class MatrixOperations {
         return det;
     }
 
+    /**
+     * Возвращает подматрицу исходной матрицы, удаляя указанную строку и столбец.
+     *
+     * @param matrix       Исходная матрица.
+     * @param rowToRemove  Индекс строки для удаления.
+     * @param colToRemove Индекс столбца для удаления.
+     * @return Подматрица.
+     */
     private double[][] getSubMatrix(double[][] matrix, int rowToRemove, int colToRemove) {
         int n = matrix.length;
         double[][] subMatrix = new double[n - 1][n - 1];
@@ -151,6 +171,7 @@ public class MatrixOperations {
         return subMatrix;
     }
 
+
     /**
      * Проверяет, что матрицы имеют одинаковое количество строк и столбцов для операций сложения и вычитания.
      *
@@ -167,15 +188,20 @@ public class MatrixOperations {
     /**
      * Выполняет операцию над двумя матрицами, применяя заданную функцию.
      *
-     * @param matrix1 Первая матрица.
-     * @param matrix2 Вторая матрица.
+     * @param matrix1   Первая матрица.
+     * @param matrix2   Вторая матрица.
      * @param operation Функция для выполнения операции над элементами матриц.
      * @return Результирующая матрица.
+     * @throws MatrixException Если ошибка при создании матрицы.
      */
-    private Matrix performMatrixOperation(Matrix matrix1, Matrix matrix2, MatrixElementOperation operation) {
+    private Matrix performMatrixOperation(Matrix matrix1, Matrix matrix2, MatrixElementOperation operation) throws MatrixException {
         int rows = matrix1.getRows();
         int cols = matrix1.getCols();
+
+        // Создание матрицы для результата
         Matrix result = new Matrix(rows, cols);
+
+        // Процесс выполнения операции
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 double value = operation.apply(matrix1.getElement(i, j), matrix2.getElement(i, j));

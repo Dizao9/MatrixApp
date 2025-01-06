@@ -1,4 +1,3 @@
-
 import org.example.exception.MatrixException;
 import org.example.matrix.Matrix;
 import org.example.operations.MatrixOperations;
@@ -22,11 +21,13 @@ public class MatrixOperationsTest {
     private Matrix matrix3;
 
     /**
-     *  Метод, выполняемый перед каждым тестовым методом.
-     *  Инициализирует объект {@link MatrixOperations} и тестовые матрицы {@link Matrix}.
+     * Метод, выполняемый перед каждым тестовым методом.
+     * Инициализирует объект {@link MatrixOperations} и тестовые матрицы {@link Matrix}.
+     *
+     * @throws MatrixException если при создании матриц возникает ошибка
      */
     @BeforeEach
-    void setUp() {
+    void setUp() throws MatrixException {
         matrixOperations = new MatrixOperations();
         matrix1 = new Matrix(new double[][]{{1, 2}, {3, 4}});
         matrix2 = new Matrix(new double[][]{{5, 6}, {7, 8}});
@@ -60,7 +61,7 @@ public class MatrixOperationsTest {
     }
 
     @Test
-    void testMultiplyByScalar_ValidMatrix() {
+    void testMultiplyByScalar_ValidMatrix() throws MatrixException {
         Matrix result = matrixOperations.multiplyByScalar(matrix1, 2);
         assertArrayEquals(new double[][]{{2, 4}, {6, 8}}, result.getData(), "Умножение матрицы на скаляр выполнено некорректно");
     }
@@ -77,7 +78,6 @@ public class MatrixOperationsTest {
         assertThrows(MatrixException.class, () -> matrixOperations.multiply(matrix1, matrix4),
                 "Ожидалось исключение при умножении матриц несовместимого размера");
     }
-
 
     @Test
     void testDeterminant_ValidMatrix() throws MatrixException {

@@ -9,79 +9,67 @@ import org.example.operations.MatrixOperations;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 /**
- * Основной класс {@code Main} приложения для выполнения операций над матрицами.
- * <p>
- *  Позволяет пользователю вводить пути к файлам, содержащим матрицы, выбирать операцию
- *  (сложение, вычитание, умножение, умножение на скаляр, вычисление определителя) и
- *  выводить результат на экран.
- * </p>
+ * Главный класс приложения для работы с матрицами.
+ * Позволяет загружать матрицы из файлов, выполнять различные операции над ними
+ * и сохранять результаты в файл.
  */
 public class Main {
 
+    /**
+     * Логгер для записи информации о работе приложения.
+     */
     private static final AppLogger logger = new AppLogger(Main.class);
+    /**
+     * Сканер для чтения ввода пользователя из консоли.
+     */
     private static final Scanner scanner = new Scanner(System.in);
+    /**
+     * Объект для чтения матриц из файлов.
+     */
     private static final FileReader fileReader = new FileReader();
+    /**
+     * Объект для выполнения операций над матрицами.
+     */
     private static final MatrixOperations matrixOperations = new MatrixOperations();
-    private static Matrix[] matrices = new Matrix[2]; // Массив для хранения матриц
+    /**
+     * Массив для хранения двух матриц, с которыми выполняются операции.
+     */
+    private static Matrix[] matrices = new Matrix[2];
 
     /**
-     * Главный метод приложения, запускающий программу и обрабатывающий пользовательский ввод.
+     * Основной метод программы.
+     * Запускает работу приложения, обрабатывает пользовательский ввод,
+     * выполняет операции над матрицами и выводит результаты.
      *
-     * @param args Массив аргументов командной строки (не используется в данном приложении).
+     * @param args Аргументы командной строки (не используются).
      */
     public static void main(String[] args) {
         logger.info("Начало работы программы");
         printSystemInfo();
 
-        boolean continueCalculations = true;
-        while (continueCalculations) {
-            try {
-                if (matrices[0] == null || matrices[1] == null) {
-                    loadMatrices();
-                }
-
-                int choice = showMainMenu();
-
-                switch (choice) {
-                    case 1:
-                        performOperation();
-                        break;
-                    case 2:
-                        loadMatrices();
-                        break;
-                    case 0:
-                        continueCalculations = false;
-                        break;
-                    default:
-                        System.out.println("Некорректный выбор. Пожалуйста, выберите операцию из меню.");
-                        logger.warn("Некорректный выбор операции из меню: " + choice);
-                }
-            } catch (MatrixException e) {
-                System.err.println("Произошла ошибка: " + e.getMessage());
-                logger.error("Произошла ошибка: " + e.getMessage(), e);
-            } catch (InputMismatchException e){
-                System.err.println("Некорректный ввод данных, проверьте введенные данные.");
-                logger.error("Некорректный ввод данных. " + e.getMessage(), e);
-                scanner.nextLine(); // Очистка буфера ввода
-            }
-            catch (Exception e) {
-                System.err.println("Неизвестная ошибка " + e.getMessage());
-                logger.error("Неизвестная ошибка " + e.getMessage(), e);
-            }
+        try {
+            loadMatrices();
+            performOperation();
+        } catch (MatrixException e) {
+            handleMatrixException(e, "общей работы программы");
+        } catch (InputMismatchException e) {
+            System.err.println("Некорректный ввод данных, проверьте введенные данные.");
+            logger.error("Некорректный ввод данных: " + e.getMessage(), e);
+            scanner.nextLine(); // Очистить некорректный ввод
+        } catch (Exception e) {
+            System.err.println("Неизвестная ошибка: " + e.getMessage());
+            logger.error("Неизвестная ошибка: " + e.getMessage(), e);
+        } finally {
+            logger.info("Завершение работы программы");
         }
-
-        logger.info("Завершение работы программы");
     }
 
     /**
-     * Выводит информацию о кодировке и charset системы.
+     * Выводит информацию о системе, включая кодировку файла и кодировку по умолчанию.
      */
     private static void printSystemInfo() {
         System.out.println("File encoding: " + System.getProperty("file.encoding"));
@@ -89,207 +77,116 @@ public class Main {
     }
 
     /**
-     * Показывает главное меню программы и возвращает выбор пользователя.
+     * Загружает матрицы из файлов, указанных пользователем.
      *
-     * @return Выбор пользователя.
-     */
-    private static int showMainMenu() {
-        System.out.println("\nГлавное меню:");
-        System.out.println("1. Выполнить операцию над матрицами");
-        System.out.println("2. Загрузить новые матрицы из файлов");
-        System.out.println("0. Выход");
-        System.out.print("Введите номер действия: ");
-        try {
-            return scanner.nextInt();
-        } catch (InputMismatchException e){
-            throw e;
-        }finally {
-            scanner.nextLine(); // Очистка буфера ввода
-        }
-
-    }
-
-    /**
-     * Загружает матрицы из файлов.
-     * @throws MatrixException Если произошла ошибка при чтении файла.
+     * @throws MatrixException Если возникает ошибка при чтении матрицы из файла.
      */
     private static void loadMatrices() throws MatrixException {
         for (int i = 0; i < matrices.length; i++) {
-            boolean isLoaded = false;
-            while (!isLoaded){
-                try{
+            while (true) {
+                try {
                     System.out.print("Введите путь к " + (i + 1) + " файлу с матрицей: ");
                     String filePath = scanner.nextLine();
                     matrices[i] = fileReader.readMatrixFromFile(filePath);
-                    isLoaded = true;
-                }catch (MatrixException e){
-                    System.out.println("Ошибка чтения файла. Попробуйте ещё раз: " + e.getMessage());
-                    logger.error("Ошибка чтения файла: " + e.getMessage(), e);
+                    logger.info("Матрица " + (i + 1) + " успешно загружена из файла: " + filePath);
+                    break; // Успешно загружено, выходим из цикла
+                } catch (MatrixException e) {
+                    System.err.println("Ошибка загрузки матрицы: " + e.getMessage());
+                    logger.error("Ошибка загрузки матрицы: " + e.getMessage(), e);
                 }
-
             }
-
         }
-
-        logger.info("Матрицы успешно загружены из файлов.");
     }
 
     /**
      * Выполняет выбранную пользователем операцию над матрицами.
-     * @throws MatrixException Если произошла ошибка при выполнении операции.
+     *
+     * @throws MatrixException Если возникает ошибка при выполнении операции над матрицами.
      */
     private static void performOperation() throws MatrixException {
-        Matrix[] selectedMatrices = chooseMatrices();
-
         System.out.println("\nВыберите операцию:");
         System.out.println("1. Сложение");
         System.out.println("2. Вычитание");
         System.out.println("3. Умножение");
         System.out.println("4. Умножение на скаляр");
         System.out.println("5. Вычисление определителя первой матрицы");
-
         System.out.print("Введите номер операции: ");
-        int choice = scanner.nextInt();
-        scanner.nextLine();
+
+        int choice = getUserChoice(1, 5);
 
         Matrix resultMatrix = null;
         double determinant = 0;
 
-        switch (choice) {
-            case 1:
-                resultMatrix = matrixOperations.add(selectedMatrices[0], selectedMatrices[1]);
-                logger.info("Выполнена операция сложения матриц");
-                break;
-            case 2:
-                resultMatrix = matrixOperations.subtract(selectedMatrices[0], selectedMatrices[1]);
-                logger.info("Выполнена операция вычитания матриц");
-                break;
-            case 3:
-                resultMatrix = matrixOperations.multiply(selectedMatrices[0], selectedMatrices[1]);
-                logger.info("Выполнена операция умножения матриц");
-                break;
-            case 4:
-                System.out.print("Введите скаляр: ");
-                double scalar = scanner.nextDouble();
-                scanner.nextLine();
-                resultMatrix = matrixOperations.multiplyByScalar(selectedMatrices[0], scalar);
-                logger.info("Выполнена операция умножения матрицы на скаляр " + scalar);
-                break;
-            case 5:
-                determinant = matrixOperations.determinant(selectedMatrices[0]);
-                logger.info("Вычисление определителя первой матрицы");
-                break;
-            default:
-                System.out.println("Некорректный выбор операции.");
-                logger.warn("Некорректный выбор операции");
-                return;
+        try {
+            switch (choice) {
+                case 1 -> resultMatrix = matrixOperations.add(matrices[0], matrices[1]);
+                case 2 -> resultMatrix = matrixOperations.subtract(matrices[0], matrices[1]);
+                case 3 -> resultMatrix = matrixOperations.multiply(matrices[0], matrices[1]);
+                case 4 -> {
+                    System.out.print("Введите скаляр: ");
+                    double scalar = scanner.nextDouble();
+                    scanner.nextLine(); // Очистить буфер
+                    resultMatrix = matrixOperations.multiplyByScalar(matrices[0], scalar);
+                }
+                case 5 -> determinant = matrixOperations.determinant(matrices[0]);
+            }
+        } catch (MatrixException e) {
+            handleMatrixException(e, "выполнения операции");
         }
+
         printResult(resultMatrix, choice, determinant);
     }
 
     /**
-     * Выводит результат операции на экран и предлагает сохранить в файл.
+     * Выводит результат операции на экран или в файл.
      *
-     * @param resultMatrix Результирующая матрица (может быть null).
-     * @param choice       Выбранная пользователем операция.
-     * @param determinant  Определитель матрицы (если вычислялся).
+     * @param resultMatrix Результат операции в виде матрицы.
+     * @param choice       Выбранный номер операции.
+     * @param determinant  Определитель матрицы (если была выбрана операция вычисления определителя).
      */
     private static void printResult(Matrix resultMatrix, int choice, double determinant) {
         if (resultMatrix != null) {
             System.out.println("Результат:\n" + resultMatrix);
-            logger.info("Результат операции выведен на экран");
+            logger.info("Результат операции выведен на экран.");
             saveMatrixToFile(resultMatrix);
         } else if (choice == 5) {
             System.out.println("Определитель первой матрицы: " + determinant);
-            logger.info("Определитель первой матрицы выведен на экран");
+            logger.info("Определитель первой матрицы выведен на экран.");
+        } else {
+            System.err.println("Результат операции недоступен.");
+            logger.warn("Результат операции недоступен.");
         }
     }
 
     /**
-     * Предлагает пользователю сохранить матрицу в файл и выполняет сохранение.
+     * Предлагает пользователю сохранить результат в файл и выполняет сохранение при согласии.
      *
-     * @param matrix Матрица для сохранения.
+     * @param matrix Матрица для сохранения в файл.
      */
     private static void saveMatrixToFile(Matrix matrix) {
         System.out.println("Хотите сохранить результат в файл? (y/n)");
         String saveChoice = scanner.nextLine();
 
         if (saveChoice.equalsIgnoreCase("y")) {
-            System.out.println("Сохранить в существующий файл (1) или создать новый (2)?");
-            int fileChoice = scanner.nextInt();
-            scanner.nextLine();
-
-            System.out.print("Введите путь к файлу: ");
+            System.out.print("Введите путь к файлу для сохранения: ");
             String filePath = scanner.nextLine();
 
-            try {
-                if (fileChoice == 1){
-                    saveMatrixToExistingFile(matrix, filePath);
-                }else if (fileChoice == 2){
-                    saveMatrixToNewFile(matrix, filePath);
-                }else {
-                    System.out.println("Некорректный выбор сохранения файла.");
-                    logger.warn("Некорректный выбор сохранения файла.");
-                }
-
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+                writeMatrixToFile(matrix, writer);
                 System.out.println("Результат сохранен в файл: " + filePath);
                 logger.info("Результат сохранен в файл: " + filePath);
-
             } catch (IOException e) {
-                System.err.println("Ошибка сохранения файла: " + e.getMessage());
-                logger.error("Ошибка сохранения файла: " + e.getMessage(), e);
+                handleMatrixException(e, "сохранения файла");
             }
         }
     }
 
     /**
-     * Сохраняет матрицу в существующий файл.
+     * Записывает матрицу в файл.
      *
-     * @param matrix   Матрица для сохранения.
-     * @param filePath Путь к существующему файлу.
-     * @throws IOException Если произошла ошибка ввода-вывода.
-     */
-    private static void saveMatrixToExistingFile(Matrix matrix, String filePath) throws IOException {
-        Path path = Paths.get(filePath);
-        if (!Files.exists(path)) {
-            throw new IOException("Файл не существует: " + filePath);
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writeMatrixToFile(matrix, writer);
-        }
-
-    }
-
-    /**
-     * Сохраняет матрицу в новый файл.
-     *
-     * @param matrix   Матрица для сохранения.
-     * @param filePath Путь к новому файлу.
-     * @throws IOException Если произошла ошибка ввода-вывода.
-     */
-    private static void saveMatrixToNewFile(Matrix matrix, String filePath) throws IOException {
-        Path path = Paths.get(filePath);
-
-        if (Files.exists(path)) {
-            throw new IOException("Файл с таким именем уже существует: " + filePath);
-        }
-
-        Files.createDirectories(path.getParent()); // Создаем директорию для файла если её нет
-        Files.createFile(path);
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writeMatrixToFile(matrix, writer);
-        }
-
-    }
-
-    /**
-     * Записывает матрицу в файл в формате, пригодном для чтения.
-     *
-     * @param matrix Матрица для сохранения.
-     * @param writer Поток вывода для записи в файл.
-     * @throws IOException Если произошла ошибка ввода-вывода.
+     * @param matrix Матрица для записи.
+     * @param writer  BufferedWriter для записи в файл.
+     * @throws IOException Если возникает ошибка при записи в файл.
      */
     private static void writeMatrixToFile(Matrix matrix, BufferedWriter writer) throws IOException {
         double[][] data = matrix.getData();
@@ -305,36 +202,39 @@ public class Main {
     }
 
     /**
-     *  Предлагает пользователю выбрать, какие матрицы использовать для операции.
-     *  @return Массив из двух выбранных матриц.
+     * Обрабатывает исключения, возникшие при работе с матрицами.
+     * Выводит сообщение об ошибке и записывает ошибку в лог.
+     *
+     * @param e       Исключение, которое нужно обработать.
+     * @param context Контекст, в котором возникло исключение (например, "загрузки матрицы").
      */
-    private static Matrix[] chooseMatrices() {
-        while (true) {
-            System.out.println("\nВыберите матрицы для операции (1 или 2):");
-            System.out.print("Введите номер первой матрицы: ");
-            int firstMatrixNumber = scanner.nextInt();
-            scanner.nextLine();
-            System.out.print("Введите номер второй матрицы: ");
-            int secondMatrixNumber = scanner.nextInt();
-            scanner.nextLine();
-
-
-            if (isValidMatrixNumber(firstMatrixNumber) && isValidMatrixNumber(secondMatrixNumber)) {
-                return new Matrix[]{matrices[firstMatrixNumber - 1], matrices[secondMatrixNumber - 1]};
-            } else {
-                System.out.println("Некорректный номер матрицы, повторите ввод.");
-                logger.warn("Некорректный номер матрицы: " + firstMatrixNumber + " или " + secondMatrixNumber);
-            }
-        }
-
+    private static void handleMatrixException(Exception e, String context) {
+        System.err.println("Ошибка " + context + ": " + e.getMessage());
+        logger.error("Ошибка " + context + ": " + e.getMessage(), e);
     }
 
     /**
-     *  Проверяет, является ли введенный номер матрицы валидным.
-     * @param matrixNumber номер матрицы для проверки.
-     * @return true, если номер валидный, false в ином случае.
+     * Получает от пользователя корректный ввод номера операции в заданном диапазоне.
+     *
+     * @param min Минимальное значение выбора.
+     * @param max Максимальное значение выбора.
+     * @return Выбранный пользователем номер операции.
      */
-    private static boolean isValidMatrixNumber(int matrixNumber) {
-        return matrixNumber >= 1 && matrixNumber <= matrices.length;
+    private static int getUserChoice(int min, int max) {
+        while (true) {
+            System.out.println("Введите число от " + min + " до " + max + ":");
+            if (scanner.hasNextInt()) {  // Проверка, есть ли ввод для nextInt
+                int choice = scanner.nextInt();
+                scanner.nextLine();  // Очистить буфер
+                if (choice >= min && choice <= max) {
+                    return choice;
+                } else {
+                    System.out.println("Введите число от " + min + " до " + max + ":");
+                }
+            } else {
+                System.out.println("Ошибка ввода. Введите корректное число.");
+                scanner.nextLine();  // Очистить некорректный ввод
+            }
+        }
     }
 }

@@ -15,6 +15,42 @@ public class Matrix {
     private final int rows;
     private final int cols;
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true; // Сравнение по ссылке
+        if (obj == null || getClass() != obj.getClass()) return false; // Проверка типа
+
+        Matrix matrix = (Matrix) obj;
+
+        // Сравнение размеров матриц
+        if (this.getRows() != matrix.getRows() || this.getCols() != matrix.getCols()) {
+            return false;
+        }
+
+        // Сравнение элементов матриц
+        for (int i = 0; i < this.getRows(); i++) {
+            for (int j = 0; j < this.getCols(); j++) {
+                if (Double.compare(this.getData()[i][j], matrix.getData()[i][j]) != 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getRows();
+        result = 31 * result + getCols();
+        for (double[] row : getData()) {
+            for (double value : row) {
+                long bits = Double.doubleToLongBits(value);
+                result = 31 * result + (int) (bits ^ (bits >>> 32));
+            }
+        }
+        return result;
+    }
+
     /**
      * Создает новую матрицу с заданным количеством строк и столбцов.
      *
@@ -93,13 +129,12 @@ public class Matrix {
 
     /**
      * Возвращает внутреннее представление матрицы в виде двумерного массива.
-     *
+     *ф
      * @return двумерный массив double, представляющий матрицу.
      */
     public double[][] getData() {
         return data;
     }
-
 
     /**
      * Проверяет, что индексы находятся в пределах границ матрицы.
