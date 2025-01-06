@@ -21,7 +21,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
     testImplementation 'org.junit.platform:junit-platform-launcher:1.10.0'
 
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0") // <---- ДОБАВЬ ЭТУ СТРОКУ
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
 
     testImplementation 'org.mockito:mockito-core:5.3.1'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
@@ -62,6 +62,18 @@ tasks.named('distZip') {
 
 tasks.named('distTar') {
     dependsOn 'shadowJar'
+}
+
+tasks.named('startScripts') {
+    dependsOn shadowJar
+}
+
+tasks.named('run') {
+    dependsOn shadowJar
+}
+
+tasks.named('startShadowScripts') {
+    dependsOn tasks.named('jar')
 }
 
 tasks.withType(JavaCompile) {
