@@ -137,4 +137,5 @@ org.junit.jupiter:junit-jupiter-params: Параметризованные те�
 org.mockito:mockito-core: Фреймворк для создания моков.
 org.mockito:mockito-junit-jupiter: Интеграция Mockito с JUnit 5.
 🎥 Демонстрация работы
-![2025-01-0621-20-08-ezgif com-video-to-gif-converter (1)](https://github.com/user-attachments/assets/5b3897b3-b87c-44d8-9b9a-aca92572ce3e)
+![2025-01-06-21-20-08](https://github.com/user-attachments/assets/3f620f52-d5a3-445a-b5f5-0ae9c9229048)
+
