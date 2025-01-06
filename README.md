@@ -127,15 +127,16 @@ ERROR: Сообщения об ошибках.
 Логи записываются в консоль.
 📦 Зависимости
 Проект использует следующие библиотеки (управляемые Gradle):
-
-org.jetbrains.kotlin:kotlin-stdlib: Стандартная библиотека Kotlin.
-org.apache.logging.log4j:log4j-api: API для логирования.
+```plaintext
+org.jetbrains.kotlin:kotlin-stdlib:  Стандартная библиотека Kotlin. 
+org.apache.logging.log4j:log4j-api:  API для логирования.
 org.apache.logging.log4j:log4j-core: Ядро логирования.
 org.junit.jupiter:junit-jupiter-api: API для JUnit тестирования.
 org.junit.jupiter:junit-jupiter-engine: Движок для JUnit тестов.
 org.junit.jupiter:junit-jupiter-params: Параметризованные тесты JUnit.
 org.mockito:mockito-core: Фреймворк для создания моков.
 org.mockito:mockito-junit-jupiter: Интеграция Mockito с JUnit 5.
+```
 🎥 Демонстрация работы
 ![2025-01-06-21-20-08](https://github.com/user-attachments/assets/3f620f52-d5a3-445a-b5f5-0ae9c9229048)
 
