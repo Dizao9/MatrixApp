@@ -1,40 +1,47 @@
+# Игнорируем все папки target
 target/
-!.mvn/wrapper/maven-wrapper.jar
+
+# Исключаем из игнорирования maven-wrapper.jar, если он есть
+!/.mvn/wrapper/maven-wrapper.jar
+
+# Исключаем из игнорирования target в src/main и src/test
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+# Игнорируем все файлы и папки .idea
+.idea/
+
+# Игнорируем все файлы IntelliJ IDEA
 *.iws
 *.iml
 *.ipr
 
-### Eclipse ###
+# Игнорируем все файлы Eclipse
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
 .sts4-cache
 
-### NetBeans ###
+# Игнорируем все файлы NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 build/
+# исключаем из игнорирования папку build в src/main и src/test
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# Игнорируем все файлы VS Code
 .vscode/
 
-### Mac OS ###
+# Игнорируем все файлы Mac OS
 .DS_Store
-### App.log ###
+
+# Игнорируем логи
+*.log
 app.log
